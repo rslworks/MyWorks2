@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Pembelajaran Fiqh at-Taharah visual tentang syarat dan ketentuan Tayammum dan Air." />
+    <meta name="author" content="Rasul Sayyaf" />
+    <meta name="theme-color" content="#fdfbf7" />
+    <title>Fiqh at-Taharah: Comprehensive Guide | artgroup</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;700&family=Noto+Kufi+Arabic:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <style>
+        .font-arabic { font-family: 'Noto Naskh Arabic', serif; line-height: 1.8; }
+        .font-kufi { font-family: 'Noto Kufi Arabic', sans-serif; }
+        
+        /* Smooth Scroll & Hide Scrollbar */
+        html { scroll-behavior: smooth; }
+        body, html { scrollbar-width: none; -ms-overflow-style: none; }
+        ::-webkit-scrollbar { display: none; width: 0px; background: transparent; }
+        
+        @keyframes kenburns {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="bg-[#fdfbf7] text-slate-800 antialiased selection:bg-amber-200">
+    <div id="root"></div>
+
+    <!-- React Application Logic -->
+    <script type="module">
+        import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
+        import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
+        import { ChevronDown, X, Instagram, Info, FileText, User, Menu, List } from 'https://esm.sh/lucide-react@0.292.0';
+
+        // --- Hooks ---
+        const useOnScreen = (threshold = 0.2) => {
+            const ref = useRef(null);
+            const [isVisible, setIsVisible] = useState(false);
+
+            useEffect(() => {
+                const element = ref.current;
+                if (!element) return;
+
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        if (entry.isIntersecting) {
+                            setIsVisible(true);
+                            observer.disconnect(); 
+                        }
+                    },
+                    { threshold }
+                );
+
+                observer.observe(element);
+
+                return () => {
+                    observer.disconnect();
+                };
+            }, [threshold]);
+
+            return [ref, isVisible];
+        };
+
+        // --- Components ---
+
+        const Modal = ({ isOpen, onClose, title, content }) => {
+            if (!isOpen) return null;
+            return React.createElement('div', {
+                className: "fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 animate-in fade-in",
+                onClick: onClose
+            }, React.createElement('div', {
+                className: "bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden transform transition-all scale-100 animate-in zoom-in-95 duration-200",
+                onClick: (e) => e.stopPropagation()
+            }, 
+                React.createElement('div', { className: "flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50" },
+                    React.createElement('h2', { className: "text-2xl font-kufi font-bold text-slate-800" }, title),
+                    React.createElement('button', { onClick: onClose, className: "p-2 bg-white border border-slate-200 rounded-full hover:bg-slate-100 transition-colors text-slate-500 hover:text-red-500" }, React.createElement(X, { size: 20 }))
+                ),
+                React.createElement('div', { className: "p-8 max-h-[70vh] overflow-y-auto font-sans text-slate-600 leading-relaxed whitespace-pre-line text-lg" }, content),
+                React.createElement('div', { className: "p-4 bg-slate-50 border-t border-slate-100 text-center" }, 
+                    React.createElement('span', { className: "text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400" }, "artgroup © 2025")
+                )
+            ));
+        };
+
+        // --- SIDEBAR COMPONENT ---
+        const Sidebar = ({ pages, activeIndex, visible, onToggle }) => {
+            const groupedPages = pages.reduce((acc, page) => {
+                if (!page.babId) return acc; 
+                if (!acc[page.babId]) acc[page.babId] = { title: page.babTitle || `Bab ${page.babId}`, pages: [] };
+                acc[page.babId].pages.push(page);
+                return acc;
+            }, {});
+
+            const scrollToPage = (index) => {
+                const element = document.getElementById(`page-${index + 1}`); 
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            return React.createElement(React.Fragment, null,
+                React.createElement('button', {
+                    onClick: (e) => { e.stopPropagation(); onToggle(); },
+                    className: "fixed top-6 right-6 z-50 p-3 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-slate-200 text-slate-700 hover:bg-white transition-all"
+                }, visible ? React.createElement(X, { size: 24 }) : React.createElement(List, { size: 24 })),
+
+                React.createElement('div', {
+                    onClick: (e) => e.stopPropagation(),
+                    className: `fixed top-0 right-0 h-full w-80 bg-white/95 backdrop-blur-xl border-l border-slate-200 shadow-2xl z-40 transform transition-transform duration-500 ease-in-out overflow-y-auto ${visible ? 'translate-x-0' : 'translate-x-full'}`
+                },
+                    React.createElement('div', { className: "p-6 pb-24" },
+                        React.createElement('div', { className: "mb-8 text-center" },
+                            React.createElement('h2', { className: "text-xl font-kufi font-bold text-slate-800" }, "فهرس المحتويات"),
+                            React.createElement('p', { className: "text-xs text-slate-400 font-sans tracking-widest mt-1 uppercase" }, "Daftar Isi")
+                        ),
+                        
+                        React.createElement('div', { className: "mb-6" },
+                            React.createElement('button', {
+                                onClick: () => scrollToPage(0),
+                                className: `w-full text-right px-4 py-2 rounded-lg text-sm font-bold transition-colors ${activeIndex === 0 ? 'bg-amber-100 text-amber-800' : 'hover:bg-slate-50 text-slate-600'}`
+                            }, "Opening Utama")
+                        ),
+
+                        Object.keys(groupedPages).sort((a, b) => a - b).map(babId => {
+                            const group = groupedPages[babId];
+                            if (babId > 9 && babId < 5 && !group.pages.length) return null; 
+
+                            // Tampilkan judul bab yang benar
+                            let babDisplayName = group.title;
+                            if(babId == 2) babDisplayName = "Bab 2: باب المياه";
+                            if(babId == 3) babDisplayName = "Bab 3: نواقض الوضوء";
+                            if(babId == 4) babDisplayName = "Bab 4: موجبات الوضوء";
+                            if(babId == 5) babDisplayName = "Bab 5: باب التيمم";
+                            if(babId == 6) babDisplayName = "Bab 6: معرفة طهارة الغسل";
+                            if(babId == 7) babDisplayName = "Bab 7: في أحكام الجنابة والحيض";
+                            if(babId == 8) babDisplayName = "Bab 8: في الدماء";
+                            if(babId == 9) babDisplayName = "Bab 9: الطهارة من النجس";
+
+                            return React.createElement('div', { key: babId, className: "mb-6" },
+                                React.createElement('h3', { className: "px-2 text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1" }, 
+                                    babDisplayName
+                                ),
+                                React.createElement('div', { className: "space-y-1" },
+                                    group.pages.map((page, idx) => {
+                                        let label = page.title;
+                                        if (page.type === 'opening-bab') label = "Opening Bab";
+                                        if (page.type === 'khulashah') label = "↳ خلاصة (Ringkasan)";
+                                        if (page.type === 'masalah') label = page.title.split(':')[0]; 
+
+                                        const pageGlobalIndex = pages.findIndex(p => p.id === page.id);
+                                        const isActive = activeIndex === pageGlobalIndex;
+
+                                        return React.createElement('button', {
+                                            key: page.id,
+                                            onClick: () => scrollToPage(pageGlobalIndex),
+                                            className: `w-full text-right px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 ${isActive ? 'bg-amber-50 text-amber-700 border-r-2 border-amber-400' : 'text-slate-600 hover:bg-slate-50 hover:pr-5'}`
+                                        }, label);
+                                    })
+                                )
+                            );
+                        }),
+
+                        React.createElement('div', { className: "opacity-40 pointer-events-none mb-6" },
+                            [].map(num => 
+                                React.createElement('div', { key: num, className: "px-4 py-2 text-xs text-slate-300 border-r border-dashed border-slate-200 mb-1" }, `Bab ${num} (Coming Soon)`)
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        const Section = ({ page, index, total, onOpenModal }) => {
+            const [ref, isVisible] = useOnScreen(0.2);
+            
+            const isHero = index === 0 || index === total - 1; 
+            const isIntro = page.category === "Intro"; 
+            const isOpeningBab = page.type === 'opening-bab';
+            const isSplitLayout = page.type === 'masalah' || page.type === 'khulashah' || [3, 5, 7].includes(page.id); 
+            const isEven = index % 2 === 0;
+
+            const imgLoading = index === 0 ? "eager" : "lazy";
+            const fetchPriority = index === 0 ? "high" : "auto";
+            const imgAlt = `Ilustrasi visual untuk topik: ${page.title}`;
+            
+            const baseTransition = "transition-all duration-1000 ease-out transform";
+            const visibleState = isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12';
+
+            const getSplitContent = (content) => {
+                const dividerIndex = content.findIndex(item => item.type === 'divider');
+                if (dividerIndex === -1) return { part1: content, part2: [] };
+                return { part1: content.slice(0, dividerIndex), part2: content.slice(dividerIndex + 1) };
+            };
+
+            // Layout 1: Hero
+            if (isHero) {
+                return React.createElement('section', {
+                    id: `page-${page.id}`,
+                    className: "relative min-h-screen w-full flex items-center justify-center overflow-hidden snap-start py-20"
+                }, 
+                    React.createElement('div', { className: "absolute inset-0 z-0" },
+                        React.createElement('img', { 
+                            src: page.image, 
+                            loading: imgLoading, 
+                            fetchpriority: fetchPriority,
+                            className: "w-full h-full object-cover scale-105 animate-[kenburns_20s_infinite_alternate]",
+                            style: { animationDuration: '30s' },
+                            onError: (e) => {
+                                if (!e.currentTarget.src.includes('retry')) {
+                                    e.currentTarget.src += (e.currentTarget.src.includes('?') ? '&' : '?') + 'retry=' + new Date().getTime();
+                                }
+                            }
+                        }),
+                        React.createElement('div', { className: "absolute inset-0 bg-black/40 backdrop-blur-[1px]" }),
+                        React.createElement('div', { className: "absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 opacity-80" })
+                    ),
+                    React.createElement('div', {
+                        ref: ref,
+                        className: `relative z-10 max-w-5xl mx-auto px-6 text-center flex flex-col items-center justify-center ${baseTransition} delay-500 ${visibleState}`,
+                        dir: "rtl"
+                    }, 
+                        React.createElement('h1', { className: "text-5xl md:text-7xl lg:text-8xl font-bold font-kufi text-white mb-6 leading-tight drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]" }, page.title),
+                        page.subtitle && React.createElement('h2', { className: "text-2xl md:text-3xl lg:text-4xl font-kufi text-white font-light max-w-3xl leading-relaxed drop-shadow-md opacity-95 mb-6" }, page.subtitle),
+                        React.createElement('div', { className: "w-24 h-1 bg-white mx-auto rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)]" })
+                    ),
+                    index === total - 1 && React.createElement('div', { className: "absolute bottom-0 w-full z-30 pb-10 pt-32 bg-gradient-to-t from-black via-black/80 to-transparent" },
+                        React.createElement('div', { className: "max-w-5xl mx-auto px-6 flex flex-col items-center gap-8 text-center" }, 
+                            React.createElement('div', { className: "flex flex-wrap justify-center items-center gap-6 md:gap-10" },
+                                React.createElement('button', { onClick: (e) => { e.stopPropagation(); onOpenModal('about'); }, className: "group flex items-center gap-2 text-white/70 hover:text-white transition-all duration-300" },
+                                    React.createElement('span', { className: "p-2 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors" }, React.createElement(User, { size: 16 })),
+                                    React.createElement('span', { className: "text-sm font-medium tracking-wide border-b border-transparent group-hover:border-white/50 pb-0.5" }, "About Us")
+                                ),
+                                React.createElement('button', { onClick: (e) => { e.stopPropagation(); onOpenModal('terms'); }, className: "group flex items-center gap-2 text-white/70 hover:text-white transition-all duration-300" },
+                                    React.createElement('span', { className: "p-2 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors" }, React.createElement(FileText, { size: 16 })),
+                                    React.createElement('span', { className: "text-sm font-medium tracking-wide border-b border-transparent group-hover:border-white/50 pb-0.5" }, "Terms & Privacy")
+                                ),
+                                React.createElement('a', { href: "https://instagram.com/rslsyyf_", target: "_blank", rel: "noopener noreferrer", onClick: (e) => e.stopPropagation(), className: "group flex items-center gap-2 text-amber-200/80 hover:text-amber-300 transition-all duration-300" },
+                                    React.createElement('span', { className: "p-2 rounded-full bg-amber-600/20 group-hover:bg-amber-600/30 border border-amber-500/30 transition-colors" }, React.createElement(Instagram, { size: 16 })),
+                                    React.createElement('span', { className: "text-sm font-medium tracking-wide border-b border-transparent group-hover:border-amber-300/50 pb-0.5" }, "Contact Us")
+                                )
+                            ),
+                            React.createElement('div', { className: "flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity duration-500" },
+                                React.createElement('p', { className: "text-[10px] md:text-xs font-bold tracking-[0.4em] uppercase text-white" }, "artgroup License © 2025")
+                            )
+                        )
+                    )
+                );
+            }
+
+            // Layout 2: Intro
+            if (isIntro) {
+                return React.createElement('section', {
+                    id: `page-${page.id}`,
+                    className: "min-h-screen w-full flex items-center justify-center bg-white snap-start relative overflow-hidden py-24"
+                },
+                    React.createElement('div', { className: "absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] pointer-events-none" }),
+                    React.createElement('div', {
+                        ref: ref,
+                        className: "flex flex-col items-center justify-center z-10"
+                    },
+                        React.createElement('div', { className: `w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden shadow-2xl mb-8 relative group border-[3px] border-slate-100 ${baseTransition} ${visibleState}` },
+                            React.createElement('img', {
+                                src: page.image,
+                                loading: "lazy",
+                                className: "w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-[5s] ease-in-out",
+                                onError: (e) => {
+                                    if (!e.currentTarget.src.includes('retry')) {
+                                        e.currentTarget.src += (e.currentTarget.src.includes('?') ? '&' : '?') + 'retry=' + new Date().getTime();
+                                    }
+                                }
+                            })
+                        ),
+                        React.createElement('h1', { className: `text-4xl md:text-6xl font-kufi font-bold text-slate-800 mb-3 drop-shadow-sm tracking-wide text-center px-4 ${baseTransition} delay-300 ${visibleState}` }, page.title),
+                        React.createElement('div', { className: `px-6 py-2 bg-slate-50 rounded-full border border-slate-100 ${baseTransition} delay-500 ${visibleState}` },
+                            React.createElement('p', { className: "text-lg md:text-xl font-sans text-slate-500 tracking-[0.25em] font-medium uppercase" }, page.subtitle)
+                        )
+                    )
+                );
+            }
+
+            // Layout 3: Split
+            if (isSplitLayout) {
+                const { part1, part2 } = getSplitContent(page.content);
+                return React.createElement('section', {
+                    id: `page-${page.id}`,
+                    className: "min-h-screen w-full relative flex items-center justify-center overflow-hidden snap-start bg-[#fbf9f4] py-24"
+                },
+                    React.createElement('div', { className: "absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] pointer-events-none -z-10" }),
+                    React.createElement('div', {
+                        ref: ref,
+                        className: "w-full max-w-[1600px] mx-auto p-4 lg:p-6 flex flex-col lg:flex-row gap-6 items-stretch z-10 md:pr-80", 
+                        dir: "rtl"
+                    },
+                        React.createElement('div', { className: `flex-[5] flex flex-col justify-center gap-4 ${baseTransition} delay-500 ${visibleState}` },
+                            React.createElement('div', { className: "flex items-center gap-4 mb-2 shrink-0" },
+                                React.createElement('div', { className: "w-1.5 h-10 bg-amber-600 rounded-full shrink-0" }),
+                                React.createElement('div', null, React.createElement('h1', { className: "text-2xl lg:text-4xl font-bold font-kufi text-slate-800 leading-tight" }, page.title))
+                            ),
+                            React.createElement('div', { className: "bg-white rounded-2xl p-5 lg:p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-center transition-transform hover:translate-y-[-2px]" },
+                                page.type === 'khulashah' ? 
+                                    React.createElement('div', { className: "space-y-6 font-arabic text-3xl lg:text-4xl text-slate-700 leading-[1.8]" }, // PROJECTOR MODE: Larger Text
+                                        part1.map((item, idx) => item.type === 'highlight' ? 
+                                            React.createElement('div', { key: idx, className: "bg-slate-50 p-6 rounded-2xl border-r-4 border-slate-600 my-4" }, item.text) :
+                                            React.createElement('p', { key: idx }, item.text)
+                                        )
+                                    )
+                                :
+                                React.createElement(React.Fragment, null,
+                                    React.createElement('h3', { className: "text-3xl text-amber-700 font-bold font-kufi mb-3 border-b border-slate-50 pb-2" }, "الأقوال ونسبتها:"), // PROJECTOR MODE: Larger H3
+                                    React.createElement('div', { className: "space-y-4 font-arabic text-3xl lg:text-4xl text-slate-700 leading-[1.8]" }, // PROJECTOR MODE: Larger Text
+                                        part1.map((item, idx) => React.createElement('div', { key: idx, className: "flex gap-3 items-baseline" },
+                                            React.createElement('span', { className: "flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-black font-sans font-bold text-2xl shrink-0 mt-1" }, idx + 1), // PROJECTOR MODE: Larger Number
+                                            React.createElement('div', { className: "flex-1" },
+                                                item.label && React.createElement('span', { className: "font-bold text-slate-900 ml-1" }, item.label),
+                                                React.createElement('span', null, item.text)
+                                            )
+                                        ))
+                                    )
+                                )
+                            ),
+                            (page.type !== 'khulashah' && part2.length > 0) && React.createElement('div', { className: "bg-white rounded-2xl p-5 lg:p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-center transition-transform hover:translate-y-[-2px]" },
+                                React.createElement('h3', { className: "text-3xl text-amber-700 font-bold font-kufi mb-3 border-b border-slate-50 pb-2" }, "الدليل:"), // PROJECTOR MODE: Larger H3
+                                React.createElement('div', { className: "space-y-4 font-arabic text-3xl lg:text-4xl text-slate-700 leading-[1.8]" }, // PROJECTOR MODE: Larger Text
+                                    part2.map((item, idx) => React.createElement('div', { key: idx, className: "flex gap-3 items-baseline" },
+                                        React.createElement('span', { className: "text-amber-500 text-2xl shrink-0 mt-0.5" }, "✦"), // PROJECTOR MODE: Larger Symbol
+                                        React.createElement('div', { className: "flex-1" },
+                                            item.label && React.createElement('span', { className: "font-bold text-slate-900 ml-1" }, item.label),
+                                            React.createElement('span', null, item.text)
+                                        )
+                                    ))
+                                )
+                            )
+                        ),
+                        React.createElement('div', { className: `hidden lg:block flex-[4] py-4 ${baseTransition} ${visibleState}` },
+                            React.createElement('div', { className: "w-full h-full min-h-[500px] rounded-[2rem] overflow-hidden shadow-xl relative ring-1 ring-slate-900/5 group" },
+                                React.createElement('img', {
+                                    src: page.image,
+                                    loading: "lazy",
+                                    className: "w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105",
+                                    onError: (e) => {
+                                        if (!e.currentTarget.src.includes('retry')) {
+                                            e.currentTarget.src += (e.currentTarget.src.includes('?') ? '&' : '?') + 'retry=' + new Date().getTime();
+                                        }
+                                    }
+                                }),
+                                React.createElement('div', { className: "absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" })
+                            )
+                        )
+                    )
+                );
+            }
+
+            // Layout 4: Standard
+            return React.createElement('section', {
+                id: `page-${page.id}`,
+                className: "min-h-screen w-full relative flex items-center justify-center overflow-hidden py-24 border-b border-slate-100 snap-start bg-white"
+            },
+                React.createElement('div', { className: "absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] pointer-events-none -z-10" }),
+                React.createElement('div', {
+                    ref: ref,
+                    className: `w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-20 items-center z-10 md:pr-80` 
+                },
+                    React.createElement('div', { className: `w-full lg:w-1/2 flex justify-center ${baseTransition} ${visibleState}` },
+                        React.createElement('div', { className: "relative group w-full max-w-md lg:max-w-full aspect-[4/5] lg:aspect-[3/4] max-h-[75vh] rounded-[2rem] overflow-hidden shadow-2xl bg-slate-50" },
+                            React.createElement('img', {
+                                src: page.image,
+                                loading: "lazy",
+                                className: "w-full h-full object-cover transition-transform duration-[3s] ease-in-out group-hover:scale-110",
+                                onError: (e) => {
+                                    if (!e.currentTarget.src.includes('retry')) {
+                                        e.currentTarget.src += (e.currentTarget.src.includes('?') ? '&' : '?') + 'retry=' + new Date().getTime();
+                                    }
+                                }
+                            }),
+                            React.createElement('div', { className: "absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" })
+                        )
+                    ),
+                    React.createElement('div', {
+                        className: `w-full lg:w-1/2 flex flex-col items-end text-right ${baseTransition} delay-500 ${visibleState} ${isOpeningBab ? 'pr-12 lg:pr-24' : ''}`,
+                        dir: "rtl"
+                    },
+                        React.createElement('h1', { className: "text-4xl lg:text-6xl font-bold font-kufi text-slate-800 mb-4 leading-tight" }, page.title),
+                        page.subtitle && React.createElement('h2', { className: "text-xl lg:text-2xl font-kufi text-amber-700 mb-8 opacity-90" }, page.subtitle),
+                        // Only render white card if there is content content (not for opening pages)
+                        page.content.length > 0 && React.createElement(
+                            'div',
+                            { className: "w-full bg-white p-6 lg:p-10 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-shadow duration-300" },
+                            React.createElement(
+                                'div',
+                                { className: "space-y-6 font-arabic text-lg lg:text-2xl text-slate-800 leading-[2.8]" },
+                                page.content.map((item, idx) => {
+                                    if (item.type === 'divider') return React.createElement('div', { key: `div-${idx}`, className: "h-px w-full bg-gradient-to-l from-slate-200 via-slate-300 to-slate-200 my-6" });
+                                    if (item.type === 'highlight') return React.createElement('div', { key: `hl-${idx}`, className: "bg-slate-50 p-6 rounded-2xl border-r-4 border-slate-600 my-4" }, React.createElement('p', { className: "text-slate-900 font-medium" }, item.text));
+                                    return React.createElement('div', { key: `txt-${idx}`, className: "relative" },
+                                        item.label && React.createElement('strong', { className: "block text-slate-900 font-bold text-xl mb-1" }, item.label),
+                                        React.createElement('span', { className: "text-slate-800" }, item.text)
+                                    );
+                                })
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        const App = () => {
+            const [activeModal, setActiveModal] = useState(null); 
+            const [activePageIndex, setActivePageIndex] = useState(0);
+            const [sidebarVisible, setSidebarVisible] = useState(true);
+
+            useEffect(() => {
+                if (window.innerWidth < 768) {
+                    setSidebarVisible(false);
+                }
+
+                const handleScroll = () => {
+                    const sections = document.querySelectorAll('section');
+                    let current = 0;
+                    sections.forEach((section, index) => {
+                        const top = section.offsetTop - 300;
+                        if (window.scrollY >= top) {
+                            current = index;
+                        }
+                    });
+                    setActivePageIndex(current);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const toggleSidebar = () => {
+                setSidebarVisible(prev => !prev);
+            };
+
+            const aboutContent = `**Tentang Developer**\n\nAssalamualaikum. Saya Rasul Sayyaf (rslsyyf_), pengembang di balik website Fiqh Visual ini.\n\nProyek ini didedikasikan untuk memadukan keindahan desain digital dengan kedalaman ilmu syar'i.\n\n**artgroup** adalah inisiatif kreatif kami dalam mengembangkan media pembelajaran Islam berbasis estetika visual.`;
+            const termsContent = `**Terms & Privacy Policy**\n\n1. **Penggunaan Konten:** Disarikan dari kitab-kitab Fiqh yang mu'tabar.\n2. **Privasi:** Kami menghormati privasi Anda.\n3. **Hak Cipta:** Desain oleh artgroup (2025).`;
+
+            const pages = [
+                // 1. MAIN HERO
+                { id: 1, babId: 0, type: 'main-hero', category: "Muqaddimah", title: "فقه الطهارة", subtitle: "", content: [], image: "https://images.pexels.com/photos/1824570/pexels-photo-1824570.jpeg" },
+                
+                // 2. INTRO PROFILE
+                { id: 2, babId: 0, category: "Intro", title: "رسول سياف", subtitle: "2025.03.3987", content: [], image: "https://images.pexels.com/photos/30218477/pexels-photo-30218477.jpeg" },
+
+                // ================== BAB 1: WUDHU ==================
+                // Opening Bab 1
+                { 
+                    id: 101, babId: 1, babTitle: "Bab الوضوء", type: 'opening-bab',
+                    title: "باب الوضوء", subtitle: "أحكام وشروط الوضوء",
+                    content: [], 
+                    image: "https://images.pexels.com/photos/67184/pexels-photo-67184.jpeg" 
+                },
+                // Masalah 1: Niat
+                {
+                    id: 102, babId: 1, babTitle: "Bab الوضوء", type: 'masalah', masalahId: 1,
+                    title: "المسألة (١): هل النية شرط في صحة الوضوء؟", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "النية شرط لصحة الوضوء (مالك، الشافعي، أحمد، أبو ثور، داود)." },
+                        { label: "القول ٢:", text: "النية ليست بشرط لصحة الوضوء (أبو حنيفة، الثوري)." },
+                        { type: "divider" },
+                        { label: "دليل القول ١:", text: "قوله ﷺ: (إنما الأعمال بالنيات)." },
+                        { label: "دليل القول ٢:", text: "الوضوء عبادة معقولة المعنى كغسل النجاسة، فهي غير مفتقرة إلى النية." }
+                    ],
+                    image: "https://images.pexels.com/photos/612341/pexels-photo-612341.jpeg"
+                },
+                {
+                    id: 103, babId: 1, babTitle: "Bab الوضوء", type: 'khulashah', masalahId: 1,
+                    title: "خلاصة المسألة", subtitle: "حكم النية",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف في هذه المسألة إلى تردد الوضوء بين أن يكون عبادة محضة (غير معقولة المعنى) وبين أن يكون عبادة معقولة المعنى (للنظافة)، والراجح هو القول ١ بأن النية شرط لصحة الوضوء، لأن الوضوء أقرب شبهًا بالعبادة منه إلى النظافة، والعبادة تفتقر إلى نية." }],
+                    image: "https://images.pexels.com/photos/31355121/pexels-photo-31355121.jpeg"
+                },
+                // Masalah 18: Tartib
+                {
+                    id: 104, babId: 1, babTitle: "Bab الوضوء", type: 'masalah', masalahId: 18,
+                    title: "المسألة (١٨): حكم ترتيب أفعال الوضوء", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "ترتيب أفعال الوضوء سنة (أبو حنيفة، مالك، الثوري، داود)." },
+                        { label: "القول ٢:", text: "ترتيب أفعال الوضوء فريضة/واجب (الشافعي، أحمد، أبو عبيد)." },
+                        { type: "divider" },
+                        { label: "دليل القول ١:", text: "أن الواو في قوله تعالى: ﴿فاغسلوا وجوهكم وأيديكم﴾ لا تقتضي الترتيب." },
+                        { label: "دليل القول ٢:", text: "أن الله ذكر ممسوحًا بين مغسولين، ولم يُرَ النبي ﷺ توضأ إلا مرتبًا." }
+                    ],
+                    image: "https://images.pexels.com/photos/331249/pexels-photo-331249.jpeg"
+                },
+                {
+                    id: 105, babId: 1, babTitle: "Bab الوضوء", type: 'khulashah', masalahId: 18,
+                    title: "خلاصة المسألة", subtitle: "حكم الترتيب",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى اختلافهم في (واو) العطف هل تقتضي الترتيب أو الجمع، والراجح وجوب الترتيب لأن مداومة النبي ﷺ تفسر إجمال الآية، ونقل القرطبي إجماع السلف على الترتيب." }],
+                    image: "https://images.pexels.com/photos/9457476/pexels-photo-9457476.jpeg"
+                },
+                // Masalah 20: Tasmiyah
+                {
+                    id: 106, babId: 1, babTitle: "Bab الوضوء", type: 'masalah', masalahId: 20,
+                    title: "المسألة (٢٠): حكم التسمية عند بداية الوضوء", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "التسمية مستحبة (أبو حنيفة، مالك، الشافعي، أحمد في رواية)." },
+                        { label: "القول ٢:", text: "التسمية فرض (أحمد، أهل الظاهر)." },
+                        { type: "divider" },
+                        { label: "دليل القول ١:", text: "عدم ذكر التسمية في آية الوضوء." },
+                        { label: "دليل القول ٢:", text: "حديث: (لا وضوء لمن لم يسم الله)." }
+                    ],
+                    image: "https://images.pexels.com/photos/16620395/pexels-photo-16620395.jpeg"
+                },
+                {
+                    id: 107, babId: 1, babTitle: "Bab الوضوء", type: 'khulashah', masalahId: 20,
+                    title: "خلاصة المسألة", subtitle: "حكم التسمية",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تصحيح حديث (لا وضوء لمن لم يسم الله)، والراجح أن التسمية مستحبة، وحمل الجمهور الحديث على نفي الكمال لا نفي الصحة." }],
+                    image: "https://images.pexels.com/photos/1390556/pexels-photo-1390556.jpeg"
+                },
+
+                // ================== BAB 2: AL-MIYAH ==================
+                // Opening Bab 2
+                {
+                    id: 201, babId: 2, babTitle: "Bab المياه", type: 'opening-bab',
+                    title: "باب المياه", subtitle: "أحكام المياه وأنواعها",
+                    content: [],
+                    image: "https://images.pexels.com/photos/1533720/pexels-photo-1533720.jpeg"
+                },
+                // Masalah 30: Air Laut
+                {
+                    id: 202, babId: 2, babTitle: "Bab المياه", type: 'masalah', masalahId: 30,
+                    title: "المسألة (٣٠): حكم التطهر بماء البحر", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "يجوز التطهر بماء البحر (جمهور العلماء)." },
+                        { label: "القول ٢:", text: "لا يجوز (أو يكره) التطهر بماء البحر (عبد الله بن عمر، عبد الله بن عمرو بن العاص)." },
+                        { type: "divider" },
+                        { label: "دليل القول ١:", text: "قوله ﷺ في البحر: (هو الطهور ماؤه الحل ميتته)." },
+                        { label: "دليل القول ٢:", text: "حديث عبد الله بن عمر: (لا يركب البحر إلا حاج أو معتمر… فإن تحت البحر نارًا)." }
+                    ],
+                    image: "https://images.pexels.com/photos/931018/pexels-photo-931018.jpeg"
+                },
+                {
+                    id: 203, babId: 2, babTitle: "Bab المياه", type: 'khulashah', masalahId: 30,
+                    title: "خلاصة المسألة", subtitle: "حكم ماء البحر",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تعارض ظواهر الآثار في هل يشمل ماء البحر اسم الماء المطلق أم لا، والراجح هو القول ١ (يجوز التطهر بماء البحر) لثبوت الحديث بكونه طهورًا." }],
+                    image: "https://images.pexels.com/photos/1054391/pexels-photo-1054391.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                },
+                // Masalah 32: Dua Qullah
+                {
+                    id: 204, babId: 2, babTitle: "Bab المياه", type: 'masalah', masalahId: 32,
+                    title: "المسألة (٣٢): حد القليل والكثير في الماء", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "الكثير ما زاد على القلتين، والقليل ما دون القلتين (الشافعي، أحمد)." },
+                        { label: "القول ٢:", text: "القليل هو الذي إذا حرّك آدميٌّ أحد طرفيه سرت الحركة إلى الطرف الآخر (أبو حنيفة)." },
+                        { type: "divider" },
+                        { label: "دليل القول ١:", text: "حديث ابن عمر مرفوعًا: (إذا كان الماء قلتين لم يحمل خبثًا)." },
+                        { label: "دليل القول ٢:", text: "القياس؛ لأن سريان النجاسة في جميع الماء تكون بسريان الحركة." }
+                    ],
+                    image: "https://images.pexels.com/photos/8074426/pexels-photo-8074426.jpeg"
+                },
+                {
+                    id: 205, babId: 2, babTitle: "Bab المياه", type: 'khulashah', masalahId: 32,
+                    title: "خلاصة المسألة", subtitle: "حد الماء",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تعارض ظاهر الأثر (الحديث) مع القياس، والراجح هو القول ١ (الحد بالقلتين) لأن الحديث نص في محل الخلاف، ولا يمكن ضبط حد الماء القليل بتحريكه لاختلاف قوة التحريك من شخص لآخر." }],
+                    image: "https://images.pexels.com/photos/1556797/pexels-photo-1556797.jpeg"
+                },
+                // Masalah 33: Air Bercampur
+                {
+                    id: 206, babId: 2, babTitle: "Bab المياه", type: 'masalah', masalahId: 33,
+                    title: "المسألة (٣٣): حكم الماء إذا خالطه طاهر (ينفك عنه غالبًا) وغير أحد أوصافه", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "الماء المخالط بطاهر ينفك عنه وقد غيّره غير مطهِّر (مالك، الشافعي، أحمد)." },
+                        { label: "القول ٢:", text: "الماء المخالط بطاهر ينفك عنه ولم يغيره هو مطهِّر (أبو حنيفة)." },
+                        { type: "divider" },
+                        { label: "دليل القول ١:", text: "قوله تعالى: ﴿فَلَمْ تَجِدُوا مَاءً فَتَيَمَّمُوا﴾، والماء المخالط بطاهر ينفك عنه لا يتناوله اسم الماء المطلق، وإنما يُضاف إلى الشيء الذي خالطه." },
+                        { label: "دليل القول ٢:", text: "عموم قوله تعالى: ﴿فَلَمْ تَجِدُوا مَاءً فَتَيَمَّمُوا﴾، وهذا يتناوله اسم الماء المطلق، فجاز الوضوء به ما دام باقياً على رقته وجريانه." }
+                    ],
+                    image: "https://images.pexels.com/photos/3323682/pexels-photo-3323682.jpeg"
+                },
+                {
+                    id: 207, babId: 2, babTitle: "Bab المياه", type: 'khulashah', masalahId: 33,
+                    title: "خلاصة المسألة", subtitle: "حكم الماء المخالط",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى خفاء تناول اسم الماء المطلق للماء الذي خالطه أشياء طاهرة تنفك عنه (كالزعفران)، والراجح هو القول ١ (غير مطهِّر) لقوة دليل أصحابه، فلا يمكن أن يُسمّى ماء الزعفران ماءً مطلقًا دون قيد." }],
+                    image: "https://images.pexels.com/photos/8084658/pexels-photo-8084658.jpeg"
+                },
+
+                // ================== BAB 3: NAWAQIDUL WUDHU ==================
+                // Opening Bab 3
+                {
+                    id: 301, babId: 3, babTitle: "Bab نواقض الوضوء", type: 'opening-bab',
+                    title: "نواقض الوضوء", subtitle: "أحكام النواقض",
+                    content: [],
+                    image: "https://images.pexels.com/photos/33169801/pexels-photo-33169801.jpeg"
+                },
+                // Masalah 44
+                {
+                    id: 302, babId: 3, babTitle: "Bab نواقض الوضوء", type: 'masalah', masalahId: 44,
+                    title: "المسألة (٤٤): انتقاض الوضوء من أكل لحم الجزور", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "لا يجب الوضوء من أكل لحم الجزور (جمهور الفقهاء)." },
+                        { label: "القول ٢:", text: "يجب الوضوء من أكل لحم الجزور (أحمد، إسحاق)." },
+                        { type: "divider" },
+                        { label: "الجمهور:", text: "حديث جابر بن عبد الله: (كان آخر الأمرين من رسول الله ﷺ ترك الوضوء مما مسته النار)." },
+                        { label: "القول ٢:", text: "حديث جابر بن سمرة: (أن رجلًا سأل رسول الله ﷺ: أتوضأ من لحوم الإبل؟ قال: نعم)." }
+                    ],
+                    image: "https://images.pexels.com/photos/731014/pexels-photo-731014.jpeg"
+                },
+                {
+                    id: 303, babId: 3, babTitle: "Bab نواقض الوضوء", type: 'khulashah', masalahId: 44,
+                    title: "خلاصة المسألة", subtitle: "حكم لحم الجزور",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى النظر هل أكل لحم الجزور داخل في عموم ترك الوضوء مما مسته النار أم له حكم خاص به، والراجح عند المصنف هو قول الجمهور ١ (لا يجب الوضوء) لأن حديث الوضوء من لحم الجزور داخل تحت حكم النسخ بترك الوضوء مما مسته النار." }],
+                    image: "https://images.pexels.com/photos/208168/pexels-photo-208168.jpeg"
+                },
+                // Masalah 45
+                {
+                    id: 304, babId: 3, babTitle: "Bab نواقض الوضوء", type: 'masalah', masalahId: 45,
+                    title: "المسألة (٤٥): انتقاض الوضوء من الضحك في الصلاة", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "يجب الوضوء من الضحك في الصلاة (أبو حنيفة)." },
+                        { label: "القول ٢:", text: "لا يجب الوضوء من الضحك في الصلاة (الجمهور)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "مرسل حديث أبي العالية: (أن قومًا ضحكوا في الصلاة، فأمرهم النبي ﷺ بإعادة الوضوء والصلاة)." },
+                        { label: "القول ٢:", text: "الأصل أن الشيء لا ينقض الطهارة في الصلاة وهو نفسه لا ينقضها في غير الصلاة." }
+                    ],
+                    image: "https://images.pexels.com/photos/7317560/pexels-photo-7317560.jpeg"
+                },
+                {
+                    id: 305, babId: 3, babTitle: "Bab نواقض الوضوء", type: 'khulashah', masalahId: 45,
+                    title: "خلاصة المسألة", subtitle: "حكم الضحك",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى اختلافهم في تصحيح حديث بطلان الوضوء من الضحك ومخالفته للأصول، والراجح هو القول ٢ (لا يجب الوضوء)، وقد وصف ابن رشد القول بوجوب الوضوء بأنه شاذ." }],
+                    image: "https://images.pexels.com/photos/6129591/pexels-photo-6129591.jpeg"
+                },
+                // Masalah 46
+                {
+                    id: 306, babId: 3, babTitle: "Bab نواقض الوضوء", type: 'masalah', masalahId: 46,
+                    title: "المسألة (٤٦): انتقاض الوضوء من حمل الميت", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "يجب الوضوء من حمل الميت (ابن حزم)." },
+                        { label: "القول ٢:", text: "لا يجب الوضوء من حمل الميت (جمهور العلماء)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث أبي هريرة رضي الله عنه أن النبي ﷺ قال: (من غسل ميتًا فليغتسل، ومن حمله فليتوضأ)." },
+                        { label: "القول ٢:", text: "حديث ابن عباس مرفوعًا: (ليس عليكم من غسل ميتكم غسل إذا غسلتموه، فإن ميتكم ليس بنجس)." }
+                    ],
+                    image: "https://images.pexels.com/photos/19785500/pexels-photo-19785500.jpeg"
+                },
+                {
+                    id: 307, babId: 3, babTitle: "Bab نواقض الوضوء", type: 'khulashah', masalahId: 46,
+                    title: "خلاصة المسألة", subtitle: "حكم حمل الميت",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تعارض ظاهر الحديث مع الأصل، والراجح هو القول ٢ (لا يجب الوضوء)، حيث ذهب بعض العلماء إلى أن حديث أبي هريرة منسوخ أو مصروف لمعنى غسل اليدين، ووصف ابن رشد القول بوجوب الوضوء بأنه شاذ." }],
+                    image: "https://images.pexels.com/photos/29673079/pexels-photo-29673079.jpeg"
+                },
+
+                // ================== BAB 4: WAJIBAT WUDHU ==================
+                // Opening Bab 4
+                {
+                    id: 401, babId: 4, babTitle: "Bab موجبات الوضوء", type: 'opening-bab',
+                    title: "الأفعال التي تشترط هذه الطهارة (الوضوء) في فعلها", subtitle: "",
+                    content: [],
+                    image: "https://images.pexels.com/photos/59831/water-drop-rain-falling-pouring-59831.jpeg"
+                },
+                // Masalah 47
+                {
+                    id: 402, babId: 4, babTitle: "Bab موجبات الوضوء", type: 'masalah', masalahId: 47,
+                    title: "المسألة (٤٧): هل تشترط الطهارة لصلاة الجنازة وسجود التلاوة؟", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "تشترط الطهارة لصلاة الجنازة وسجود التلاوة (الجمهور)." },
+                        { label: "القول ٢:", text: "لا تشترط الطهارة لصلاة الجنازة وسجود التلاوة (الشعبي، بعض السلف)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "عموم قوله ﷺ: (لا يقبل الله صلاة بغير طهور)، وصلاة الجنازة تسمى صلاة." },
+                        { label: "القول ٢:", text: "سجود التلاوة وصلاة الجنازة ليس فيهما ركوع ولا سجود كامل كالصلاة المعهودة، وقد سجد المشركون مع النبي ﷺ في سورة النجم وهم غير متوضئين." }
+                    ],
+                    image: "https://images.pexels.com/photos/6495740/pexels-photo-6495740.jpeg"
+                },
+                {
+                    id: 403, babId: 4, babTitle: "Bab موجبات الوضوء", type: 'khulashah', masalahId: 47,
+                    title: "خلاصة المسألة", subtitle: "حكم صلاة الجنازة",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى الاحتمال العارض في إطلاق اسم (الصلاة) على صلاة الجنازة وسجود التلاوة، هل هو حقيقة أم مجاز، والراجح هو القول ١ (تشترط الطهارة) لأن إلحاق صلاة الجنازة بالصلاة أقوى دليلًا." }],
+                    image: "https://images.pexels.com/photos/17201363/pexels-photo-17201363.jpeg"
+                },
+                // Masalah 48
+                {
+                    id: 404, babId: 4, babTitle: "Bab موجبات الوضوء", type: 'masalah', masalahId: 48,
+                    title: "المسألة (٤٨): هل الوضوء شرط في مس المصحف؟", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "الوضوء شرط لمس المصحف (الأئمة الأربعة)." },
+                        { label: "القول ٢:", text: "الوضوء ليس بشرط لمس المصحف (أهل الظاهر)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "قوله تعالى: ﴿لا يَمَسُّهُ إِلَّا الْمُطَهَّرُونَ﴾، وكتاب النبي ﷺ لعمرو بن حزم: (لا يمس القرآن إلا طاهر)." },
+                        { label: "القول ٢:", text: "أن المقصود بـ(المطهرون) في الآية هم الملائكة، والبراءة الأصلية إذ لا دليل قاطع ينهى عن مس المصحف بدون وضوء." }
+                    ],
+                    image: "https://images.pexels.com/photos/8164567/pexels-photo-8164567.jpeg"
+                },
+                {
+                    id: 405, babId: 4, babTitle: "Bab موجبات الوضوء", type: 'khulashah', masalahId: 48,
+                    title: "خلاصة المسألة", subtitle: "حكم مس المصحف",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تردد قوله تعالى (لا يمسه إلا المطهرون) بين الخبر والنهي، وهل المراد بالمطهرين بنو آدم أم الملائكة، والراجح هو القول ١ (يشترط الطهارة) تعظيمًا للقرآن، وعملاً بحديث عمرو بن حزم." }],
+                    image: "https://images.pexels.com/photos/29808495/pexels-photo-29808495.jpeg"
+                },
+                // Masalah 52
+                {
+                    id: 406, babId: 4, babTitle: "Bab موجبات الوضوء", type: 'masalah', masalahId: 52,
+                    title: "المسألة (٥٢): هل يشترط الوضوء لقراءة القرآن وذكر الله تعالى؟", subtitle: "",
+                    content: [
+                        { label: "القول ١:", text: "يجوز لغير المتوضئ أن يقرأ القرآن ويذكر الله تعالى (الجمهور)." },
+                        { label: "القول ٢:", text: "لا يجوز لغير المتوضئ أن يقرأ القرآن ويذكر الله تعالى (الحسن بن صالح)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث عائشة رضي الله عنها: (كان النبي ﷺ يذكر الله على كل أحيانه)، وحديث علي رضي الله عنه: (كان لا يحجبه عن قراءة القرآن شيء إلا الجنابة)." },
+                        { label: "القول ٢:", text: "حديث المهاجر بن قنفذ: (أنه سلّم على النبي ﷺ وهو يتوضأ، فلم يرد عليه حتى فرغ من وضوئه وقال: إني كرهت أن أذكر الله إلا على طهارة)." }
+                    ],
+                    image: "https://images.pexels.com/photos/20558475/pexels-photo-20558475.jpeg"
+                },
+                {
+                    id: 407, babId: 4, babTitle: "Bab موجبات الوضوء", type: 'khulashah', masalahId: 52,
+                    title: "خلاصة المسألة", subtitle: "حكم الذكر",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تعارض ظاهر حديثي الإباحة والكراهة، والراجح هو القول ١ (يجوز قراءة القرآن وذكر الله لغير المتوضئ)، وحُملت الكراهة في الحديث الآخر على ترك الأفضل والأكمل لا على التحريم." }],
+                    image: "https://images.pexels.com/photos/20867448/pexels-photo-20867448.jpeg"
+                },
+
+                // ================== BAB 5: TAYAMMUM ==================
+                // Opening Bab 5
+                { 
+                    id: 500, babId: 5, babTitle: "Bab التيمم", type: 'opening-bab',
+                    title: "باب التيمم", subtitle: "أحكام التيمم وشروطه",
+                    content: [], 
+                    image: "https://images.pexels.com/photos/712392/pexels-photo-712392.jpeg" 
+                },
+                // Masalah 87
+                { id: 3, babId: 5, babTitle: "Bab التيمم", type: 'masalah', title: "المسألة (٨٧): هل النية شرط لصحة التيمم؟", subtitle: "أقوال ونسبتها", content: [{ label: "القول الأول:", text: "النية شرط لصحة التيمم. (الجمهور) ." }, { label: "القول الثاني:", text: "النية (ليست) شرطًا في صحة التيمم. (زفر / الأوزاعي / الحسن بن حي) ." }, { type: "divider" }, { label: "دليل القول الأول:", text: "عموم حديث: (إنما الأعمال بالنيات) [متفق عليه]." }, { label: "دليل القول الثاني:", text: "التيمم عبادة معقولة المعنى فلا تحتاج إلى نية، كغسل النجاسة." }], image: "https://images.pexels.com/photos/5525232/pexels-photo-5525232.jpeg" },
+                { id: 4, babId: 5, babTitle: "Bab التيمم", type: 'khulashah', title: "خلاصة المسألة", subtitle: "حكم النية في التيمم", content: [{ type: "highlight", text: "خلاصة المسألة أن الفقهاء اختلفوا في اشتراط النية للتيمم؛ هل هو عبادة محضة كالوضوء أم وسيلة للنظافة كإزالة النجاسة؟ والقول الراجح هو قول الجمهور باشتراط النية؛ لأن التيمم عبادة محضة (غير معقولة المعنى) وقربة كالصلاة، ولعموم الحديث \"إنما الأعمال بالنيات\"، فلا يصح التيمم إلا بنية استباحة الصلاة." }], image: "https://images.pexels.com/photos/2373495/pexels-photo-2373495.jpeg" },
+                { id: 5, babId: 5, babTitle: "Bab التيمم", type: 'masalah', title: "المسألة (٨٨): هل طلب الماء شرط في جواز التيمم؟", subtitle: "أقوال ونسبتها", content: [{ label: "القول الأول:", text: "يشترط طلب الماء قبل التيمم. (مالك / الشافعي / أحمد) ." }, { label: "القول الثاني:", text: "(لا) يشترط طلب الماء قبل التيمم. (أبو حنيفة) ." }, { type: "divider" }, { label: "دليل القول الأول:", text: "قوله تعالى: ﴿فَلَمْ تَجِدُواْ مَآءً فَتَيَمَّمُوا﴾ [المائدة: ٦]، لا يقال لم يجد الماء إلا بعد الطلب." }, { label: "دليل القول الثاني:", text: "عموم قوله ﷺ: (الصعيد الطيب وضوء المسلم وإن لم يجد الماء عشر سنين)، فما دام أنه لم يعلم بوجود الماء، فأشبه ما لو طلب فلم يجد." }], image: "https://images.pexels.com/photos/34131588/pexels-photo-34131588.jpeg" },
+                { id: 6, babId: 5, babTitle: "Bab التيمم", type: 'khulashah', title: "خلاصة المسألة", subtitle: "حكم طلب الماء", content: [{ type: "highlight", text: "خلاصة المسألة تدور حول وجوب السعي والبحث عن الماء قبل العدول إلى التيمم؛ والقول الراجح هو قول الجمهور (مالك والشافعي وأحمد) باشتراط الطلب؛ لأن الله تعالى علق الحكم بعدم وجدان الماء في قوله \"فلم تجدوا\"، ومن لم يطلب الماء لا يسمى \"غير واجد\" له، والظن لا يغني عن اليقين في وجود الماء." }], image: "https://images.pexels.com/photos/32109973/pexels-photo-32109973.jpeg" },
+                { id: 7, babId: 5, babTitle: "Bab التيمم", type: 'masalah', title: "المسألة (٨٩): هل يشترط دخول وقت الصلاة لجواز التيمم؟", subtitle: "أقوال ونسبتها", content: [{ label: "القول الأول:", text: "يشترط دخول الوقت لجواز التيمم للفريضة. (مالك / الشافعي / أحمد) ." }, { label: "القول الثاني:", text: "(لا) يشترط دخول الوقت للتيمم للفريضة. (أبو حنيفة / الظاهرية / ابن شعبان - المالكي) ." }, { type: "divider" }, { label: "دليل القول الأول:", text: "قوله تعالى: ﴿يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوٓاْ إِذَا قُمْتُمْ إِلَى ٱلصَّلَوٰةِ﴾ [المائدة: ٦]، ظاهر الآية لا وضوء ولا تيمم إلا عند وجوب القيام لأداء الصلاة، وهذا بعد دخول الوقت." }, { label: "دليل القول الثاني:", text: "القياس على الوضوء الذي يجوز قبل الوقت." } ], image: "https://images.pexels.com/photos/7524272/pexels-photo-7524272.jpeg" },
+                { id: 8, babId: 5, babTitle: "Bab التيمم", type: 'khulashah', title: "خلاصة المسألة", subtitle: "حكم الوقت في التيمم", content: [{ type: "highlight", text: "خلاصة المسألة تتعلق بتوقيت التيمم؛ هل هو رافع للحدث كالوضوء فيصح قبل الوقت، أم مبيح للصلاة للضرورة؟ والقول الراجح هو قول الجمهور باشتراط دخول الوقت؛ لأن التيمم طهارة ضرورة، ولا ضرورة قبل دخول وقت الصلاة، وبناءً على أن التيمم مبيح للصلاة وليس رافعًا للحدث رفعًا مطلقًا." }], image: "https://images.pexels.com/photos/6846244/pexels-photo-6846244.jpeg" },
+                
+                // ================== BAB 6: GHUSL ==================
+                // Opening Bab 6
+                {
+                    id: 601, babId: 6, babTitle: "Bab معرفة طهارة الغسل", type: 'opening-bab',
+                    title: "معرفة طهارة الغسل", subtitle: "",
+                    content: [],
+                    image: "https://images.pexels.com/photos/2766775/pexels-photo-2766775.jpeg"
+                },
+                // Masalah 55
+                {
+                    id: 602, babId: 6, babTitle: "Bab معرفة طهارة الغسل", type: 'masalah', masalahId: 55,
+                    title: "المسألة (٥٥): هل النية شرط في صحة الغسل؟", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "النية شرط في صحة الغسل (مالك، الشافعي، أحمد، داود)." },
+                        { label: "القول ٢:", text: "النية ليست شرطًا في صحة الغسل (أبو حنيفة، الثوري)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "قوله ﷺ: (إنما الأعمال بالنيات)." },
+                        { label: "القول ٢:", text: "الغسل عبادة معقولة المعنى كإزالة النجاسة، فلا تفتقر إلى نية." }
+                    ],
+                    image: "https://images.pexels.com/photos/34405780/pexels-photo-34405780.jpeg"
+                },
+                {
+                    id: 603, babId: 6, babTitle: "Bab معرفة طهارة الغسل", type: 'khulashah', masalahId: 55,
+                    title: "خلاصة المسألة", subtitle: "حكم النية في الغسل",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تردد الغسل بين أن يكون عبادة محضة (غير معقولة المعنى) وبين أن يكون عبادة معقولة المعنى (للنظافة)، والراجح هو القول ١ (اشتراط النية) لأن غسل الجنابة عبادة كالوضوء، والعبادة تفتقر إلى نية." }],
+                    image: "https://images.pexels.com/photos/19846382/pexels-photo-19846382.jpeg"
+                },
+                // Masalah 57
+                {
+                    id: 604, babId: 6, babTitle: "Bab معرفة طهارة الغسل", type: 'masalah', masalahId: 57,
+                    title: "المسألة (٥٧): حكم تخليل شعر الرأس في الغسل", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "يجب تخليل الرأس في الغسل (الجمهور)." },
+                        { label: "القول ٢:", text: "يستحب تخليل الرأس في الغسل ولا يجب (مالك في رواية)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث أبي هريرة قال النبي ﷺ: (تحت كل شعرة جنابة، فأنقوا البشرة وبلوا الشعر)." },
+                        { label: "القول ٢:", text: "حديث أم سلمة للنبي ﷺ: (إنما يكفيك أن تحثي على رأسك ثلاث حثيات)." }
+                    ],
+                    image: "https://images.pexels.com/photos/4194866/pexels-photo-4194866.jpeg"
+                },
+                {
+                    id: 605, babId: 6, babTitle: "Bab معرفة طهارة الغسل", type: 'khulashah', masalahId: 57,
+                    title: "خلاصة المسألة", subtitle: "حكم التخليل",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى معارضة ظاهر حديث أم سلمة لحديث عائشة وأبي هريرة، والراجح هو القول ١ (يجب التخليل) لأن أدلتهم أقوى، ولا يمكن ضمان وصول الماء إلى بشرة الرأس إلا مع التخليل، خصوصًا عند كثافة الشعر." }],
+                    image: "https://images.pexels.com/photos/6858689/pexels-photo-6858689.jpeg"
+                },
+                // Masalah 58
+                {
+                    id: 606, babId: 6, babTitle: "Bab معرفة طهارة الغسل", type: 'masalah', masalahId: 58,
+                    title: "المسألة (٥٨): اشتراط الفور (الموالاة) والترتيب في الغسل", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "لا تشترط الموالاة في الغسل (أبو حنيفة، الشافعي، أحمد)." },
+                        { label: "القول ٢:", text: "تشترط الموالاة في الغسل (مالك)، ويشترط الترتيب (ابن حزم)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "عموم قوله تعالى: ﴿وَإِنْ كُنْتُمْ جُنُبًا فَاطَّهَّرُوا﴾، فأمر بغسل البدن دون تقييد بموالاة." },
+                        { label: "القول ۲:", text: "القياس على الوضوء في اشتراط الموالاة، لكون البدن كله كالعضو الواحد." }
+                    ],
+                    image: "https://images.pexels.com/photos/9166305/pexels-photo-9166305.jpeg"
+                },
+                {
+                    id: 607, babId: 6, babTitle: "Bab معرفة طهارة الغسل", type: 'khulashah', masalahId: 58,
+                    title: "خلاصة المسألة", subtitle: "حكم الموالاة والترتيب",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى هل فعله ﷺ في الوضوء محمول على الوجوب أم الندب وهل يقاس الغسل عليه، والراجح هو القول ١ (عدم اشتراط الموالاة والترتيب)، ويحمل حديث أم سلمة على الاستحباب." }],
+                    image: "https://images.pexels.com/photos/33154114/pexels-photo-33154114.jpeg"
+                },
+
+                // ================== BAB 7: JANABAH & HAID ==================
+                // Opening Bab 7
+                {
+                    id: 701, babId: 7, babTitle: "Bab أحكام الجنابة والحيض", type: 'opening-bab',
+                    title: "في أحكام الجنابة والحيض", subtitle: "",
+                    content: [],
+                    image: "https://images.pexels.com/photos/161502/shower-shower-head-water-drop-of-water-161502.jpeg"
+                },
+                // Masalah 63
+                {
+                    id: 702, babId: 7, babTitle: "Bab أحكام الجنابة والحيض", type: 'masalah', masalahId: 63,
+                    title: "المسألة (٦٣): حكم مس المصحف للجنب", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "يمنع الجنب من مس المصحف (الجمهور)." },
+                        { label: "القول ٢:", text: "يجوز مس المصحف للجنب (داود)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "قوله تعالى: ﴿لا يَمَسُّهُ إِلَّا الْمُطَهَّرُونَ﴾، والمراد بالمطهرين هنا بنو آدم، والخبر في الآية للنهي." },
+                        { label: "القول ٢:", text: "أن المراد بـ(المطهرون) في الآية هم الملائكة، فيبقى الأمر على البراءة الأصلية وهي إباحة المس مطلقًا." }
+                    ],
+                    image: "https://images.pexels.com/photos/10772439/pexels-photo-10772439.jpeg"
+                },
+                {
+                    id: 703, babId: 7, babTitle: "Bab أحكام الجنابة والحيض", type: 'khulashah', masalahId: 63,
+                    title: "خلاصة المسألة", subtitle: "حكم مس المصحف",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى تردد مفهوم قوله تعالى (لا يمسه إلا المطهرون) هل المطهرون هم بنو آدم أم الملائكة، وهل الآية خبر أم نهي، والراجح هو القول ١ (يمنع الجنب من مس المصحف) لظاهر الآية، ولأنه لا يجوز مس القرآن بغير وضوء فمن باب أولى منع مسه للجنب." }],
+                    image: "https://images.pexels.com/photos/3074209/pexels-photo-3074209.jpeg"
+                },
+                // Masalah 64
+                {
+                    id: 704, babId: 7, babTitle: "Bab أحكام الجنابة والحيض", type: 'masalah', masalahId: 64,
+                    title: "المسألة (٦٤): حكم قراءة القرآن للجنب", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "يمنع الجنب من قراءة القرآن (الجمهور)." },
+                        { label: "القول ٢:", text: "يجوز للجنب قراءة القرآن (داود، ابن المنذر)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث علي رضي الله عنه قال: (كان لا يحجزه عن قراءة القرآن شيء إلا الجنابة)." },
+                        { label: "القول ٢:", text: "حديث عائشة رضي الله عنها: (كان رسول الله ﷺ يذكر الله على كل أحيانه)." }
+                    ],
+                    image: "https://images.pexels.com/photos/3936216/pexels-photo-3936216.jpeg"
+                },
+                {
+                    id: 705, babId: 7, babTitle: "Bab أحكام الجنابة والحيض", type: 'khulashah', masalahId: 64,
+                    title: "خلاصة المسألة", subtitle: "حكم قراءة الجنب",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى الاحتمال المتطرق لحديث (كان لا يمنعه من قراءة القرآن شيء…) هل هو للتحريم أم للكراهة، والراجح هو القول ١ (منع الجنب من قراءة القرآن) لأثر علي رضي الله عنه، ولأن ذلك من باب تعظيم كلام الله عز وجل." }],
+                    image: "https://images.pexels.com/photos/6873647/pexels-photo-6873647.jpeg"
+                },
+                // Masalah 65
+                {
+                    id: 706, babId: 7, babTitle: "Bab أحكام الجنابة والحيض", type: 'masalah', masalahId: 65,
+                    title: "المسألة (٦٥): حكم قراءة القرآن للحائض", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "تمنع الحائض من قراءة القرآن كالجنب (أبو حنيفة، الشافعي، أحمد)." },
+                        { label: "القول ٢:", text: "يجوز للحائض القراءة القليلة (مالك)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "إلحاق الحائض بالجنب قياسًا، لحديث علي: (كان لا يحجزه من قراءة القرآن شيء إلا الجنابة)." },
+                        { label: "القول ٢:", text: "يفرق بين الحائض والجنب استحسانًا، فالحائض يطول مقامها بخلاف الجنب، وقد تنسى القرآن إذا منعت." }
+                    ],
+                    image: "https://images.pexels.com/photos/20728843/pexels-photo-20728843.jpeg"
+                },
+                {
+                    id: 707, babId: 7, babTitle: "Bab أحكام الجنابة والحيض", type: 'khulashah', masalahId: 65,
+                    title: "خلاصة المسألة", subtitle: "حكم قراءة الحائض",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى هل يقاس الحيض على الجنابة أم يفرق بينهما لطول فترة الحيض، والراجح هو القول ١ (تمنع الحائض من قراءة القرآن)، فلا فرق بين الحائض والجنب في سائر أحكام العبادات، إلا إذا اضطرت الحائض لقراءة القرآن كالمعلمات والمتعلمات فيجوز للضرورة." }],
+                    image: "https://images.pexels.com/photos/13916567/pexels-photo-13916567.jpeg"
+                },
+
+                // ================== BAB 8: FI AL-DIMAA' ==================
+                // Opening Bab 8
+                {
+                    id: 801, babId: 8, babTitle: "Bab في الدماء", type: 'opening-bab',
+                    title: "في الدماء", subtitle: "",
+                    content: [],
+                    image: "https://images.pexels.com/photos/3786157/pexels-photo-3786157.jpeg"
+                },
+                // Masalah 66
+                {
+                    id: 802, babId: 8, babTitle: "Bab في الدماء", type: 'masalah', masalahId: 66,
+                    title: "المسألة (٦٦): أكثر أيام الحيض", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "أكثر أيام الحيض عشرة أيام (أبو حنيفة)." },
+                        { label: "القول ٢:", text: "أكثر أيام الحيض خمسة عشر يوماً (مالك، الشافعي، أحمد)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث واثلة بن الأسقع: (أقل الحيض ثلاثة أيام وأكثره عشرة أيام)." },
+                        { label: "القول ٢:", text: "قال عطاء: (رأيت من تحيض خمسة عشر يوماً)، ولا مستند إلا التجربة والعادة." }
+                    ],
+                    image: "https://images.pexels.com/photos/10189242/pexels-photo-10189242.jpeg"
+                },
+                {
+                    id: 803, babId: 8, babTitle: "Bab في الدماء", type: 'khulashah', masalahId: 66,
+                    title: "خلاصة المسألة", subtitle: "أكثر أيام الحيض",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى عدم ورود حد في الشرع لأكثر أيام الحيض، فمنهم من رجع للعرف والعادة ومنهم من اعتمد الحديث (وإن كان ضعيفاً)، والراجح هو القول ٢ (15 يوماً) لأن الحديث لا يصح في تحديد المدة، فيرجع للعادة وهي محكمة." }],
+                    image: "https://images.pexels.com/photos/4110404/pexels-photo-4110404.jpeg"
+                },
+                // Masalah 72
+                {
+                    id: 804, babId: 8, babTitle: "Bab في الدماء", type: 'masalah', masalahId: 72,
+                    title: "المسألة (٧٢): أقل مدة النفاس", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "لا حد لأقل مدة النفاس (أبو حنيفة، مالك، الشافعي، أحمد)." },
+                        { label: "القول ٢:", text: "أقل مدة النفاس 11 أو 15 أو 20 يوماً (رواية عن أبي حنيفة، أبو يوسف)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "اضطراب أحوال النساء في أقل مدة الحيض والنفاس، ولا سنة متبعة في التحديد." },
+                        { label: "القول ٢:", text: "وجد من النساء من استمر بها دم النفاس هذه المدد (11، 15، 20 يوماً)." }
+                    ],
+                    image: "https://images.pexels.com/photos/10187405/pexels-photo-10187405.jpeg"
+                },
+                {
+                    id: 805, babId: 8, babTitle: "Bab في الدماء", type: 'khulashah', masalahId: 72,
+                    title: "خلاصة المسألة", subtitle: "أقل مدة النفاس",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى عسر الوقوف على أقل مدة النفاس لاختلاف أحوال النساء ولأنه ليس هناك سنة يعمل بها، والراجح هو القول ١ (لا حد لأقله) لعدم وجود الدليل على التحديد، فمتى انقطع دم النفاس اغتسلت وصلت." }],
+                    image: "https://images.pexels.com/photos/6757684/pexels-photo-6757684.jpeg"
+                },
+                // Masalah 74
+                {
+                    id: 806, babId: 8, babTitle: "Bab في الدماء", type: 'masalah', masalahId: 74,
+                    title: "المسألة (٧٤): حكم الدم الذي يخرج من المرأة أيام الحمل", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "الحامل لا تحيض (أبو حنيفة، أحمد، الثوري)." },
+                        { label: "القول ٢:", text: "الحامل تحيض (مالك، الشافعي)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث أبي سعيد أن النبي صلى الله عليه وسلم قال في سبي أوطاس: (لا توطأ حامل حتى تضع، ولا غير ذات حمل حتى تحيض)، فجعل الحيض علامة على براءة الرحم مما يدل أنهما لا يجتمعان." },
+                        { label: "القول ٢:", text: "أن ما خرج من دم وبصفات الحيض وفي زمان إمكانه فهو حيض، والأصل السلامة من العلة." }
+                    ],
+                    image: "https://images.pexels.com/photos/25680089/pexels-photo-25680089.jpeg"
+                },
+                {
+                    id: 807, babId: 8, babTitle: "Bab في الدماء", type: 'khulashah', masalahId: 74,
+                    title: "خلاصة المسألة", subtitle: "دم الحامل",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى معارضة العرف (وجود الدم) لمفهوم الأثر (الحديث)، والراجح هو القول ١ (الحامل لا تحيض) وما يخرج منها دم استحاضة وفساد، لأن الأطباء حكموا أن هذا الدم ينزل من المشيمة وليس من الرحم." }],
+                    image: "https://images.pexels.com/photos/16974019/pexels-photo-16974019.jpeg"
+                },
+
+                // ================== BAB 9: THAHARAH FROM NAJIS (NEW) ==================
+                // Opening Bab 9
+                {
+                    id: 901, babId: 9, babTitle: "Bab الطهارة من النجس", type: 'opening-bab',
+                    title: "الطهارة من النجس", subtitle: "",
+                    content: [],
+                    image: "https://images.pexels.com/photos/59831/water-drop-rain-falling-pouring-59831.jpeg"
+                },
+                // Masalah 99
+                {
+                    id: 902, babId: 9, babTitle: "Bab الطهارة من النجس", type: 'masalah', masalahId: 99,
+                    title: "المسألة (٩٩): حكم ميتة الحيوان الذي لا دم له (الحشرات)", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "ميتة ما لا دم له طاهرة (أبو حنيفة، مالك، الشافعي في قول، أحمد)." },
+                        { label: "القول ٢:", text: "ميتة ما لا دم له نجسة (الشافعي)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث (إذا وقع الذباب في إناء أحدكم فليغمسه) دل على طهارة ميتة الذباب ولا دم له." },
+                        { label: "القول ٢:", text: "عموم قوله تعالى: ﴿حُرِّمَتْ عَلَيْكُمُ الْمَيْتَةُ﴾ عام ولم يفرق بين ميتة وأخرى." }
+                    ],
+                    image: "https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg"
+                },
+                {
+                    id: 903, babId: 9, babTitle: "Bab الطهارة من النجس", type: 'khulashah', masalahId: 99,
+                    title: "خلاصة المسألة", subtitle: "حكم ميتة الحشرات",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى اختلافهم في مفهوم قوله تعالى (حرمت عليكم الميتة) هل هو عام أم مخصوص، والراجح هو القول ١ (ميتة ما لا دم له طاهرة) لأن الآية مخصصة بحديث الذباب، وقد قال ابن المنذر: لا أعلم في المسألة خلافًا إلا في أحد قولي الشافعي." }],
+                    image: "https://images.pexels.com/photos/31148663/pexels-photo-31148663.jpeg"
+                },
+                // Masalah 100
+                {
+                    id: 904, babId: 9, babTitle: "Bab الطهارة من النجس", type: 'masalah', masalahId: 100,
+                    title: "المسألة (١٠٠): حكم ميتة الحيوان البحري", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "كل ميتة البحر (السمك) يجوز أكلها (مالك، الشافعي، أحمد)." },
+                        { label: "القول ٢:", text: "السمك الطافي يكره تحريمًا أكله (أبو حنيفة)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "قوله ﷺ عن البحر: (هو الطهور ماؤه الحل ميتته)." },
+                        { label: "القول ٢:", text: "حديث جابر مرفوعًا: (ما ألقى البحر أو جزر عنه فكلوه، وما مات فيه وطفا فلا تأكلوه)." }
+                    ],
+                    image: "https://images.pexels.com/photos/16375370/pexels-photo-16375370.jpeg"
+                },
+                {
+                    id: 905, babId: 9, babTitle: "Bab الطهارة من النجس", type: 'khulashah', masalahId: 100,
+                    title: "خلاصة المسألة", subtitle: "حكم ميتة البحر",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى احتمال عود الضمير في قوله تعالى: ﴿أُحِلَّ لَكُمْ صَيْدُ الْبَحْرِ وَطَعَامُهُ﴾ وهل يشمل الطافي أم لا، وتعارض الآثار في ذلك، والراجح هو القول ١ (كل ميتة البحر جائزة) لحديث أبي عبيدة في قصة الحوت (العنبر) الذي أكلوه وهو ميتة، وأما حديث النهي عن الطافي فهو ضعيف." }],
+                    image: "https://images.pexels.com/photos/28559524/pexels-photo-28559524.jpeg"
+                },
+                // Masalah 108
+                {
+                    id: 906, babId: 9, babTitle: "Bab الطهارة من النجس", type: 'masalah', masalahId: 108,
+                    title: "المسألة (١٠٨): هل المني طاهر؟", subtitle: "أقوال ونسبتها",
+                    content: [
+                        { label: "القول ١:", text: "المني نجس (أبو حنيفة، مالك)." },
+                        { label: "القول ٢:", text: "المني طاهر (الشافعي، أحمد، داود)." },
+                        { type: "divider" },
+                        { label: "القول ١:", text: "حديث عائشة قالت: (كنت أغسل ثوب رسول الله ﷺ من المني فيخرج إلى الصلاة وإن فيه لبقع الماء)." },
+                        { label: "القول ٢:", text: "حديث عائشة قالت: (كنت أفرك المني من ثوب رسول الله ﷺ فيصلي فيه)." }
+                    ],
+                    image: "https://images.pexels.com/photos/32669441/pexels-photo-32669441.jpeg"
+                },
+                {
+                    id: 907, babId: 9, babTitle: "Bab الطهارة من النجس", type: 'khulashah', masalahId: 108,
+                    title: "خلاصة المسألة", subtitle: "حكم المني",
+                    content: [{ type: "highlight", text: "يرجع سبب الخلاف إلى الاضطراب في روايات حديث عائشة وهل يشبه المني بالأحداث أم بالفضلات الطاهرة، والراجح هو القول ٢ (المني طاهر) جمعًا بين الأدلة، وحملًا لأحاديث الغسل على الاستحباب والتنظيف." }],
+                    image: "https://images.pexels.com/photos/16295409/pexels-photo-16295409.jpeg"
+                },
+
+                // 9. KHATIMAH
+                { id: 9, babId: 99, category: "Khatimah", title: "تم بحمد الله", subtitle: "", content: [], image: "https://images.pexels.com/photos/35003281/pexels-photo-35003281.jpeg" }
+            ];
+
+            return React.createElement(
+                'div',
+                { 
+                    className: "bg-[#fdfbf7] text-slate-800 font-sans selection:bg-amber-200 min-h-screen",
+                    onClick: toggleSidebar
+                },
+                React.createElement(
+                    'main',
+                    { className: "w-full snap-y snap-mandatory h-screen overflow-y-scroll scroll-smooth" },
+                    pages.map((page, index) => React.createElement(
+                        Section,
+                        {
+                            key: page.id,
+                            page: page,
+                            index: index,
+                            total: pages.length,
+                            onOpenModal: setActiveModal
+                        }
+                    ))
+                ),
+                // Sidebar Component Integration
+                React.createElement(Sidebar, { 
+                    pages: pages, 
+                    activeIndex: activePageIndex,
+                    visible: sidebarVisible,
+                    onToggle: toggleSidebar
+                }),
+                
+                React.createElement(Modal, { isOpen: activeModal === 'about', onClose: () => setActiveModal(null), title: "About Us", content: aboutContent }),
+                React.createElement(Modal, { isOpen: activeModal === 'terms', onClose: () => setActiveModal(null), title: "Terms & Privacy", content: termsContent })
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>
